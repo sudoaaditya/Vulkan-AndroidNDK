@@ -1,0 +1,52 @@
+# Gradle files
+.gradle/
+build/
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log/OS Files
+*.log
+.DS_Store
+
+# Android Studio generated files and folders
+.idea/
+.gradle
+local.properties
+*.iml
+*.iws
+*.ipr
+*.swp
+
+# NDK
+obj/
+libs/
+
+# CMake
+cmake-build-debug/
+cmake-build-release/
+
+# Captures
+captures/
+.externalNativeBuild/
+.cxx/
+
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# Generated files
+bin/
+gen/
+
+# OS generated files
+Thumbs.db
+.DS_Store
+.vscode/
