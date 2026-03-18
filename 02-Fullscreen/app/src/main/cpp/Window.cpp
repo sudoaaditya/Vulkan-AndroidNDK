@@ -33,6 +33,36 @@ void android_main(struct android_app* state) {
 
     // get window method
     jmethodID getWindowMethod = env->GetMethodID(activityClass, "getWindow", "()Landroid/view/Window;");
+    jobject windowObject = env->CallObjectMethod(jObject, getWindowMethod);
+
+    jmethodID getDecorViewMethod = env->GetMethodID(windowClass, "getDecorView", "()Landroid/view/View;");
+    jobject decorViewObject = env->CallObjectMethod(windowObject, getDecorViewMethod);
+
+    // get eight view class static fields for setting system UI visibility
+    const int flag_SYSTEM_UI_FLAG_IMMERSIVE = env->GetStaticIntField(viewClass, env->GetStaticFieldID(viewClass, "SYSTEM_UI_FLAG_IMMERSIVE", "I"));
+    const int flag_SYSTEM_UI_FLAG_LAYOUT_STABLE = env->GetStaticIntField(viewClass, env->GetStaticFieldID(viewClass, "SYSTEM_UI_FLAG_LAYOUT_STABLE", "I"));
+    const int flag_SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = env->GetStaticIntField(viewClass, env->GetStaticFieldID(viewClass, "SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION", "I"));
+    const int flag_SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = env->GetStaticIntField(viewClass, env->GetStaticFieldID(viewClass, "SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN", "I"));
+    const int flag_SYSTEM_UI_FLAG_HIDE_NAVIGATION = env->GetStaticIntField(viewClass, env->GetStaticFieldID(viewClass, "SYSTEM_UI_FLAG_HIDE_NAVIGATION", "I"));
+    const int flag_SYSTEM_UI_FLAG_FULLSCREEN = env->GetStaticIntField(viewClass, env->GetStaticFieldID(viewClass, "SYSTEM_UI_FLAG_FULLSCREEN", "I"));
+    const int flag_SYSTEM_UI_FLAG_LOW_PROFILE = env->GetStaticIntField(viewClass, env->GetStaticFieldID(viewClass, "SYSTEM_UI_FLAG_LOW_PROFILE", "I"));
+    const int flag_SYSTEM_UI_FLAG_IMMERSIVE_STICKY = env->GetStaticIntField(viewClass, env->GetStaticFieldID(viewClass, "SYSTEM_UI_FLAG_IMMERSIVE_STICKY", "I"));
+
+    // set system UI visibility to hide navigation bar and status bar and make the app full screen and immersive
+    int systemUiVisibilityFlags = flag_SYSTEM_UI_FLAG_IMMERSIVE
+                                | flag_SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                | flag_SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION // These two layout flag are deprecated in latest version so i am facing the brief flash of home screen issue
+                                | flag_SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN // to prevent that issue, i'd need to paint something!
+                                | flag_SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                | flag_SYSTEM_UI_FLAG_FULLSCREEN
+                                | flag_SYSTEM_UI_FLAG_LOW_PROFILE
+                                | flag_SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+    jmethodID setSystemUiVisibilityMethod = env->GetMethodID(viewClass, "setSystemUiVisibility", "(I)V");
+    env->CallVoidMethod(decorViewObject, setSystemUiVisibilityMethod, systemUiVisibilityFlags);
+
+    // detach the current thread from the Java VM
+    vm->DetachCurrentThread();
 
     Engine engine;
     memset((void*)&engine, 0, sizeof(Engine));
@@ -85,12 +115,30 @@ void engine_handle_cmd(struct android_app* app, int32_t cmd) {
         case APP_CMD_INIT_WINDOW:
             // here we initialize the window when app is resumed or started
             if (engine->app->window != NULL) {
-                androidNativeWindow = engine->app->window;;
+                androidNativeWindow = engine->app->window;
+                // Draw something to prevent the brief flash of home screen issue when using deprecated layout flags
+                // Draw background color with pixel by pixel coloring by CPU
+                ANativeWindow_Buffer buffer;
+                uint32_t *pixels = NULL;
+                uint32_t color;
+                int x, y;
+                // set the buffer geometry and format
+                ANativeWindow_setBuffersGeometry(androidNativeWindow, 0, 0, WINDOW_FORMAT_RGBA_8888);
+                if(ANativeWindow_lock(androidNativeWindow, &buffer, NULL) == 0) {
+                    pixels = (uint32_t*)buffer.bits;
+                    color = 0xFFFF00FF; // [ color set is in ABGR format ]
+                    for (y = 0; y < buffer.height; y++) {
+                        for (x = 0; x < buffer.width; x++) {
+                            pixels[y * buffer.stride + x] = color;
+                        }
+                    }
+                    ANativeWindow_unlockAndPost(androidNativeWindow);
+                }
+                engine->bActive = true;
                 __android_log_print(ANDROID_LOG_INFO, "AMK-Ndk:", "Window Created!");
             } else {
                 androidNativeWindow = NULL;
             }
-            engine->bActive = true;
         break;
 
         case APP_CMD_TERM_WINDOW:
