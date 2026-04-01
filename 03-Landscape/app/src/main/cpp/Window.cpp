@@ -61,6 +61,12 @@ void android_main(struct android_app* state) {
     jmethodID setSystemUiVisibilityMethod = env->GetMethodID(viewClass, "setSystemUiVisibility", "(I)V");
     env->CallVoidMethod(decorViewObject, setSystemUiVisibilityMethod, systemUiVisibilityFlags);
 
+    // change to landscape mode
+    jclass activityInfoClass = env->FindClass("android/content/pm/ActivityInfo");
+    const int flag_SCREEN_ORIENTATION_LANDSCAPE = env->GetStaticIntField(activityInfoClass, env->GetStaticFieldID(activityInfoClass, "SCREEN_ORIENTATION_LANDSCAPE", "I"));
+    jmethodID setRequestedOrientationMethod = env->GetMethodID(activityClass, "setRequestedOrientation", "(I)V");
+    env->CallVoidMethod(jObject, setRequestedOrientationMethod, flag_SCREEN_ORIENTATION_LANDSCAPE);
+
     // detach the current thread from the Java VM
     vm->DetachCurrentThread();
 
@@ -126,7 +132,7 @@ void engine_handle_cmd(struct android_app* app, int32_t cmd) {
                 ANativeWindow_setBuffersGeometry(androidNativeWindow, 0, 0, WINDOW_FORMAT_RGBA_8888);
                 if(ANativeWindow_lock(androidNativeWindow, &buffer, NULL) == 0) {
                     pixels = (uint32_t*)buffer.bits;
-                    color = 0xFFFF00FF; // [ color set is in ABGR format ]
+                    color = 0xFF000000; // [ color set is in ABGR format ]
                     for (y = 0; y < buffer.height; y++) {
                         for (x = 0; x < buffer.width; x++) {
                             pixels[y * buffer.stride + x] = color;
