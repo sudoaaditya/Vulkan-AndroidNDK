@@ -8,6 +8,7 @@
         android:theme="@android:style/Theme.DeviceDefault">
         <activity
             android:name="android.app.NativeActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true">
             <meta-data
                 android:name="android.app.lib_name"
@@ -18,6 +19,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
     </application>
 
 </manifest> 

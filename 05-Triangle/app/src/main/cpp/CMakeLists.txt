@@ -33,7 +33,17 @@ include (AndroidNdkModules)
 # used in the AndroidManifest.xml file.
 add_library(${CMAKE_PROJECT_NAME} SHARED
     # List C/C++ source files with relative paths to this CMakeLists.txt.
-    ${CMAKE_SOURCE_DIR}/Window.cpp)
+    ${CMAKE_SOURCE_DIR}/vk.cpp)
+
+add_library(vulkan_validation_lib
+    SHARED
+    IMPORTED)
+
+set_target_properties(
+    vulkan_validation_lib
+    PROPERTIES IMPORTED_LOCATION
+    ${CMAKE_SOURCE_DIR}/lib/${ANDROID_ABI}/libVkLayer_khronos_validation.so
+)
 
 # Specifies libraries CMake should link to your target library. You
 # can link libraries from various origins, such as libraries defined in this
@@ -42,4 +52,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     # List libraries link to the target library
     android
     log
+    vulkan
+    vulkan_validation_lib
     native_app_glue)

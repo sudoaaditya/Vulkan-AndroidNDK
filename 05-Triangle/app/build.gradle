@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    namespace 'triangle'
+    namespace 'vk_perspective_triangle'
     compileSdk 36
     ndkVersion "29.0.14206865"
 
     defaultConfig {
-        applicationId "com.amk_artr.triangle"
+        applicationId "com.amk_artr.vk_perspective_triangle"
         minSdk 35
         targetSdk 36
         versionCode 1
@@ -36,7 +36,6 @@ android {
         }
     }
     buildFeatures {
-        viewBinding true
     }
 }
 
