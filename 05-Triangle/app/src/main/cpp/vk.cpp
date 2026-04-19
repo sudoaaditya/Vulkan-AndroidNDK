@@ -2,7 +2,6 @@
 #include <android/log.h> // for __android_log_print
 
 #include <memory.h> // for memset
-#include <math.h> // for sqrtf
 #include <stdlib.h> // for malloc and free
 
 // vulkan related header files
@@ -12,8 +11,8 @@
 // glm related macros & header files
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE // clip space depth range is [0, 1]
-#include "./glm/glm.hpp"
-#include "./glm/gtc/matrix_transform.hpp"
+#include "../../../../../glm/glm.hpp"
+#include "../../../../../glm/gtc/matrix_transform.hpp"
 
 #define _ARRAYSIZE(a) (sizeof(a) / sizeof(a[0]))
 
@@ -173,6 +172,7 @@ void android_main(struct android_app* state) {
 
     // function declarations
     VkResult display(void);
+    void uninitialize(Engine*);
     void update(void);
 
     // Variables
@@ -298,6 +298,10 @@ void android_main(struct android_app* state) {
             update();
         }
     }
+
+    __android_log_print(ANDROID_LOG_INFO, "AMK-Ndk:", "Exiting android_main()!");
+    uninitialize(&engine);
+    exit(0);
 }
 
 
@@ -308,7 +312,7 @@ void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 
     // function declarations
     VkResult initialize(void);
-    void uninitialize(void);
+    void uninitialize(Engine*);
 
     // Variables
     Engine *engine = (Engine*)app->userData;
@@ -345,7 +349,8 @@ void engine_handle_cmd(struct android_app* app, int32_t cmd) {
         break;
 
         case APP_CMD_TERM_WINDOW:
-            uninitialize();
+            bDone = true;
+            uninitialize(engine);
             // here we terminate the window when app is paused or stopped
             __android_log_print(ANDROID_LOG_INFO, "AMK-Ndk:", "Window Destroyed!");
         break;
@@ -1035,7 +1040,20 @@ VkResult display(void) {
     return (vkResult);
 }
 
-void uninitialize(void) {
+void uninitialize(Engine* engine) {
+
+    bInitialized = false;
+
+    if(androidNativeWindow) {
+        ANativeWindow_release(androidNativeWindow);
+        androidNativeWindow = NULL;
+        __android_log_print(ANDROID_LOG_INFO, "AMK-Ndk:", "uninitialize(): ANativeWindow Released!.\n");
+    }
+
+    if(engine->bActive) {
+        memset((void *)engine, 0, sizeof(Engine));
+        __android_log_print(ANDROID_LOG_INFO, "AMK-Ndk:", "uninitialize(): Engine Released!.\n");
+    }
 
     // wait til vkDevice is idle
     if(vkDevice) {
@@ -1307,7 +1325,7 @@ VkResult createVulkanInstance (void) {
     vkApplicationInfo.applicationVersion = 1;
     vkApplicationInfo.pEngineName = gpszAppName;
     vkApplicationInfo. engineVersion = 1;
-    vkApplicationInfo.apiVersion = VK_API_VERSION_1_1;  // target Vulkan 1.1 for broader device support
+    vkApplicationInfo.apiVersion = VK_API_VERSION_1_3;  // target Vulkan 1.3 for broader device support
 
     // Step 3: initialize struct VkInstanceCreateInfo
     VkInstanceCreateInfo vkInstanceCreateInfo;
