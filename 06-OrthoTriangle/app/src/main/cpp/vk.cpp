@@ -2358,9 +2358,9 @@ VkResult createVertexBuffer(void) {
 
     // Step 1
     float triangle_position[] = {
-        0.0f, 1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f
+        0.0f, 50.0f, 0.0f,
+        -50.0f, -50.0f, 0.0f,
+        50.0f, -50.0f, 0.0f
     };
 
     // Step 2
@@ -3009,7 +3009,7 @@ VkResult createPipeline(void) {
     vkPipelineRasterizationStateCreateInfo.flags = 0;
     vkPipelineRasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
     vkPipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-    vkPipelineRasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    vkPipelineRasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
     vkPipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
 
     // Color Blending State
