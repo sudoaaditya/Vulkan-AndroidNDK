@@ -39,7 +39,7 @@ float lastTapX = 0.0f;
 float lastTapY = 0.0f;
 
 bool bDone = false;
-char* gpszAppName = "Vulkan Android NDK - Triangle";
+const char* gpszAppName = "Vulkan Android NDK - Rectangle";
 int winWidth = 0;
 int winHeight = 0;
 
@@ -2357,10 +2357,15 @@ VkResult createVertexBuffer(void) {
     VkResult vkResult = VK_SUCCESS;
 
     // Step 1
-    float triangle_position[] = {
-        0.0f, 1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f
+    float rectangle_position[] = {
+        // First Triangle
+        1.0f, 1.0f, 0.0f, // Top Right
+        -1.0f, 1.0f, 0.0f, // Top Left
+        -1.0, -1.0, 0.0f, // Bottom Left
+        // Second Triangle
+        -1.0f, -1.0f, 0.0f, // Bottom Left
+        1.0f, -1.0f, 0.0f, // Bottom Right
+        1.0f, 1.0f, 0.0f // Top Right
     };
 
     // Step 2
@@ -2373,7 +2378,7 @@ VkResult createVertexBuffer(void) {
     vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     vkBufferCreateInfo.pNext = NULL;
     vkBufferCreateInfo.flags = 0; // No flags, Valid Flags are used in scattered buffer
-    vkBufferCreateInfo.size = sizeof(triangle_position);
+    vkBufferCreateInfo.size = sizeof(rectangle_position);
     vkBufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     
     // Setp 4
@@ -2453,7 +2458,7 @@ VkResult createVertexBuffer(void) {
     }
 
     // Step 12
-    memcpy(data, triangle_position, sizeof(triangle_position));
+    memcpy(data, rectangle_position, sizeof(rectangle_position));
 
     // Step 13
     vkUnmapMemory(vkDevice, vertexData_position.vkDeviceMemory);
@@ -3342,7 +3347,7 @@ VkResult buildCommandBuffers(void) {
         );
 
         // Here we should call vulkan drawing functions!
-        vkCmdDraw(vkCommandBuffer_array[i], 3, 1, 0, 0);
+        vkCmdDraw(vkCommandBuffer_array[i], 6, 1, 0, 0);
 
         // End Render Pass
         vkCmdEndRenderPass(vkCommandBuffer_array[i]);
